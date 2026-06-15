@@ -1,0 +1,3 @@
+serial_id,category,brand,model,specifications,unit,price_tk,price_usd,stock_qty,notes
+S-001,SPD (PV DC),Phoenix Contact / Germany,VAL-MS1000VDC-PV/2+V,"SPD PV DC 3P 1000VDC Plug+Base Type-2 | Pole: 3P | Rated: 80A | Imax: 15kA/40kA | VPL: <=3.7kV | Mounting: DIN Rail",Pcs,6650,,0,
+S-002,SPD (AC),Phoenix Contact / Germany,VAL-MS320/40/3+1GY,"SPD AC 3P 440VAC Plug+Base Type-2 | Pole: 3P | Rated: 80A | Imax: 20kA/40kA | VPL: <=1.9kV | Mounting: DIN Rail",Pcs,9310,,0,

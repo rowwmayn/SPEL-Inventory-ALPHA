@@ -1,0 +1,11 @@
+serial_id,category,brand,model,specifications,unit,price_tk,price_usd,stock_qty,notes
+P-001,Solar Panel,Sunlink/Sherpa,SL065-12M,"65Wp Mono | Size: 670x590x30mm | Voc: 22.5V | Vmp: 18.7V | Isc: 3.78A",Wp,48,,0,25 Year Output Warranty
+P-002,Solar Panel,Sunlink/Sherpa,SL085-12M,"85Wp Mono | Size: 700x670x30mm | Voc: 23.8V | Vmp: 20V | Isc: 4.62A",Wp,48,,0,25 Year Output Warranty
+P-003,Solar Panel,Sunlink/Sherpa,SL100-12M,"100Wp Mono | Size: 830x670x30mm | Voc: 23.4V | Vmp: 19.5V | Isc: 5.57A",Wp,45,,0,25 Year Output Warranty
+P-004,Solar Panel,Sunlink/Sherpa,SL130-12M,"130Wp Mono | Size: 1080x670x30mm | Voc: 23V | Vmp: 19.2V | Isc: 7.36A",Wp,42,,0,25 Year Output Warranty
+P-005,Solar Panel,Sunlink/Sherpa,SL150-12M,"150Wp Mono | Size: 1200x670x30mm | Voc: 23.6V | Vmp: 19.7V | Isc: 8.28A",Wp,42,,0,25 Year Output Warranty
+P-006,Solar Panel,CanadianSolar/JinkoSolar/JA Solar/TrinaSolar (Tier-1),CS6W-550MS,"550Wp Mono | Size: 2278x1134x30mm | Voc: 49.6V | Vmp: 41.9V | Isc: 14A",Wp,22,,0,25 Year Output Warranty
+P-007,Solar Panel,TrinaSolar,TSM-330PE14A,"330Wp Poly | Imp: 8.83A | Vmpp/Voc: 37.4/45.8 | Isc: 9.28A",Wp,37.375,,0,
+P-008,Solar Panel,TrinaSolar,TSM-390DE15H(II),"390Wp Mono | Imp: 9.64-10.3A | Vmpp/Voc: 40-40.5/48.5-49.7 | Isc: 9.75-10.08A",Wp,40.25,,0,
+P-009,Solar Panel,TrinaSolar,TSM-400DE15M(II),"400Wp Mono | Imp: 9.74-9.92A | Vmpp/Voc: 40-41.1/48.5-50.4 | Isc: 10.18-10.37A",Wp,40.25,,0,
+P-010,Solar Panel,TrinaSolar,TSM-405DE15H(II),"405Wp Mono | Imp: 9.79-10A | Vmpp/Voc: 40-41.4/48.5-50.8 | Isc: 10.23-10.52A",Wp,40.25,,0,

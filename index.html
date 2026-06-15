@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sherpa Power Engineering — Product Price Catalog</title>
+<style>
+  :root{
+    --bg:#161d29;
+    --panel:#1f2a3c;
+    --panel-alt:#26334a;
+    --line:#34435f;
+    --text:#e9edf3;
+    --text-dim:#9aabc4;
+    --accent:#e8923a;
+    --accent-dim:#a9692a;
+    --teal:#5fb3ab;
+    --mono:'JetBrains Mono','Roboto Mono',monospace;
+    --sans:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.5;
+    background-image:
+      linear-gradient(rgba(232,146,58,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,146,58,0.025) 1px, transparent 1px);
+    background-size:40px 40px;
+  }
+
+  header{
+    border-bottom:1px solid var(--line);
+    padding:28px 24px 24px;
+    background:linear-gradient(180deg, rgba(232,146,58,0.05), transparent);
+  }
+  .header-inner{
+    max-width:1200px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  .brand-block .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.18em;
+    color:var(--accent);
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .brand-block h1{
+    font-size:28px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  .brand-block p{
+    color:var(--text-dim);
+    font-size:13px;
+    margin-top:4px;
+  }
+  .meta-block{
+    text-align:right;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  .meta-block .updated{
+    color:var(--teal);
+  }
+
+  .controls{
+    max-width:1200px;
+    margin:24px auto 0;
+    padding:0 24px;
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .search-wrap{
+    flex:1 1 280px;
+    position:relative;
+  }
+  .search-wrap input{
+    width:100%;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:11px 14px 11px 38px;
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:14px;
+    outline:none;
+    transition:border-color .15s;
+  }
+  .search-wrap input:focus{
+    border-color:var(--accent);
+  }
+  .search-wrap input::placeholder{color:var(--text-dim);}
+  .search-icon{
+    position:absolute;
+    left:13px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--text-dim);
+    font-size:14px;
+    pointer-events:none;
+  }
+  .filters{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .filter-btn{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.04em;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--text-dim);
+    padding:10px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:all .15s;
+    white-space:nowrap;
+  }
+  .filter-btn:hover{
+    border-color:var(--accent-dim);
+    color:var(--text);
+  }
+  .filter-btn.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#1a1305;
+    font-weight:600;
+  }
+
+  .stats{
+    max-width:1200px;
+    margin:18px auto 0;
+    padding:0 24px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .stat{
+    background:var(--panel);
+    padding:14px 16px;
+  }
+  .stat .num{
+    font-family:var(--mono);
+    font-size:22px;
+    font-weight:700;
+    color:var(--accent);
+  }
+  .stat .label{
+    font-size:11px;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    margin-top:2px;
+  }
+
+  main{
+    max-width:1200px;
+    margin:0 auto;
+    padding:24px;
+  }
+  .category-group{
+    margin-bottom:32px;
+  }
+  .category-group h2{
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:12px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--line);
+  }
+  .category-group h2 .count{
+    color:var(--accent);
+    font-weight:700;
+  }
+  .category-group h2::after{
+    content:'';
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:12px;
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px;
+    position:relative;
+    transition:border-color .15s, transform .15s;
+  }
+  .card:hover{
+    border-color:var(--accent-dim);
+    transform:translateY(-2px);
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .serial-tag{
+    font-family:var(--mono);
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+    background:var(--panel-alt);
+    border:1px solid var(--line);
+    border-left:3px solid var(--accent);
+    color:var(--accent);
+    padding:3px 8px;
+    border-radius:3px;
+  }
+  .stock-pill{
+    font-family:var(--mono);
+    font-size:10px;
+    padding:3px 8px;
+    border-radius:10px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    white-space:nowrap;
+  }
+  .stock-pill.in{background:rgba(95,179,171,0.15);color:var(--teal);}
+  .stock-pill.out{background:rgba(232,146,58,0.1);color:#9aabc4;}
+
+  .card .model{
+    font-size:16px;
+    font-weight:700;
+    margin-bottom:2px;
+  }
+  .card .brand{
+    font-size:12px;
+    color:var(--text-dim);
+    margin-bottom:10px;
+  }
+  .card .specs{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+    line-height:1.7;
+    border-top:1px dashed var(--line);
+    padding-top:10px;
+    margin-bottom:10px;
+  }
+  .card .specs span.divider{
+    color:var(--accent-dim);
+    margin:0 4px;
+  }
+  .card-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    border-top:1px solid var(--line);
+    padding-top:10px;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .price{
+    font-family:var(--mono);
+    font-size:18px;
+    font-weight:700;
+    color:var(--text);
+  }
+  .price .unit{
+    font-size:11px;
+    color:var(--text-dim);
+    font-weight:400;
+  }
+  .price.usd .currency{color:var(--teal);}
+  .price.tk .currency{color:var(--accent);}
+  .notes{
+    font-size:11px;
+    color:var(--text-dim);
+    font-style:italic;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--text-dim);
+    font-family:var(--mono);
+    font-size:13px;
+  }
+
+  footer{
+    max-width:1200px;
+    margin:0 auto;
+    padding:24px 24px 40px;
+    border-top:1px solid var(--line);
+    margin-top:20px;
+    color:var(--text-dim);
+    font-size:12px;
+    font-family:var(--mono);
+  }
+  footer code{
+    background:var(--panel);
+    padding:1px 5px;
+    border-radius:3px;
+    border:1px solid var(--line);
+  }
+  footer p + p{margin-top:8px;}
+
+  @media (max-width: 640px){
+    .brand-block h1{font-size:22px;}
+    .meta-block{text-align:left;}
+    .header-inner{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand-block">
+      <div class="eyebrow">Sherpa Power Engineering Ltd.</div>
+      <h1>Product &amp; Price Catalog</h1>
+      <p>Live pricing reference — synced from the team's data sheets</p>
+    </div>
+    <div class="meta-block">
+      <div>SOURCE: <span id="source-count">4</span> data sheets</div>
+      <div class="updated">LAST SYNC: <span id="last-updated">—</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search" placeholder="Search by model, serial ID, brand or spec…">
+  </div>
+  <div class="filters" id="category-filters">
+    <button class="filter-btn active" data-cat="all">ALL</button>
+  </div>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<main id="catalog">
+  <div class="empty-state">Loading catalog…</div>
+</main>
+
+<footer>
+  <p>Data sourced from <code>/data/*.csv</code> — to update prices or add new products, edit the relevant CSV and push to the repository. The catalog rebuilds automatically on page load.</p>
+  <p>Serial ID format: <code>[Category Letter]-[3 digit number]</code> — P = Solar Panel, C = Charge Controller, B = Circuit Breaker / Protection, S = SPD / Surge Protector.</p>
+</footer>
+
+<script>
+const CSV_FILES = [
+  'data/solar_panels.csv',
+  'data/charge_controllers.csv',
+  'data/circuit_protection.csv',
+  'data/spd_surge_protectors.csv',
+];
+
+let ALL_ITEMS = [];
+let ACTIVE_CATEGORY = 'all';
+
+// --- Minimal CSV parser (handles quoted fields with commas) ---
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field=''; }
+      else if(c === '\n' || c === '\r'){
+        if(c === '\r' && text[i+1] === '\n') i++;
+        row.push(field); field='';
+        if(row.length > 1 || row[0] !== ''){ rows.push(row); }
+        row = [];
+      } else field += c;
+    }
+  }
+  if(field !== '' || row.length){ row.push(field); rows.push(row); }
+
+  const headers = rows.shift().map(h => h.trim());
+  return rows.filter(r => r.length === headers.length).map(r => {
+    const obj = {};
+    headers.forEach((h,idx) => obj[h] = r[idx] !== undefined ? r[idx].trim() : '');
+    return obj;
+  });
+}
+
+async function loadCatalog(){
+  const results = [];
+  for(const file of CSV_FILES){
+    try{
+      const res = await fetch(file);
+      if(!res.ok) continue;
+      const text = await res.text();
+      const items = parseCSV(text);
+      items.forEach(item => results.push(item));
+    } catch(e){
+      console.warn('Could not load', file, e);
+    }
+  }
+  ALL_ITEMS = results;
+  document.getElementById('last-updated').textContent =
+    new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+  buildFilters();
+  render();
+}
+
+function buildFilters(){
+  const cats = [...new Set(ALL_ITEMS.map(i => i.category))].sort();
+  const wrap = document.getElementById('category-filters');
+  wrap.innerHTML = '<button class="filter-btn active" data-cat="all">ALL</button>';
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.cat = cat;
+    btn.textContent = cat.toUpperCase();
+    wrap.appendChild(btn);
+  });
+  wrap.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if(!btn) return;
+    wrap.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ACTIVE_CATEGORY = btn.dataset.cat;
+    render();
+  });
+}
+
+function formatPrice(item){
+  const tk = parseFloat(item.price_tk);
+  const usd = parseFloat(item.price_usd);
+  if(!isNaN(tk) && tk > 0){
+    return `<span class="price tk"><span class="currency">৳</span>${tk.toLocaleString('en-IN',{maximumFractionDigits:2})} <span class="unit">/ ${item.unit || 'pc'}</span></span>`;
+  }
+  if(!isNaN(usd) && usd > 0){
+    return `<span class="price usd"><span class="currency">$</span>${usd.toLocaleString('en-US',{maximumFractionDigits:2})} <span class="unit">/ ${item.unit || 'pc'}</span></span>`;
+  }
+  return `<span class="price" style="color:var(--text-dim);font-size:13px;">Price N/A</span>`;
+}
+
+function formatSpecs(specString){
+  if(!specString) return '';
+  return specString.split('|').map(s => s.trim()).join('<span class="divider">·</span>');
+}
+
+function render(){
+  const main = document.getElementById('catalog');
+  const query = document.getElementById('search').value.trim().toLowerCase();
+
+  let items = ALL_ITEMS.filter(i => {
+    if(ACTIVE_CATEGORY !== 'all' && i.category !== ACTIVE_CATEGORY) return false;
+    if(!query) return true;
+    const haystack = [i.serial_id, i.category, i.brand, i.model, i.specifications, i.notes]
+      .join(' ').toLowerCase();
+    return haystack.includes(query);
+  });
+
+  renderStats();
+
+  if(items.length === 0){
+    main.innerHTML = `<div class="empty-state">No products match "${query}".</div>`;
+    return;
+  }
+
+  const groups = {};
+  items.forEach(i => {
+    if(!groups[i.category]) groups[i.category] = [];
+    groups[i.category].push(i);
+  });
+
+  main.innerHTML = '';
+  Object.keys(groups).sort().forEach(cat => {
+    const groupItems = groups[cat];
+    const section = document.createElement('section');
+    section.className = 'category-group';
+
+    const h2 = document.createElement('h2');
+    h2.innerHTML = `${cat} <span class="count">${groupItems.length}</span>`;
+    section.appendChild(h2);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+
+    groupItems.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const stockQty = parseInt(item.stock_qty) || 0;
+      const stockHtml = stockQty > 0
+        ? `<span class="stock-pill in">${stockQty} in stock</span>`
+        : `<span class="stock-pill out">stock: N/A</span>`;
+
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="serial-tag">${item.serial_id || '—'}</span>
+          ${stockHtml}
+        </div>
+        <div class="model">${item.model || 'Unnamed'}</div>
+        <div class="brand">${item.brand || ''}</div>
+        <div class="specs">${formatSpecs(item.specifications)}</div>
+        <div class="card-footer">
+          ${formatPrice(item)}
+          ${item.notes ? `<span class="notes">${item.notes}</span>` : ''}
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    main.appendChild(section);
+  });
+}
+
+function renderStats(){
+  const statsEl = document.getElementById('stats');
+  const total = ALL_ITEMS.length;
+  const categories = new Set(ALL_ITEMS.map(i => i.category)).size;
+  const inStock = ALL_ITEMS.filter(i => (parseInt(i.stock_qty)||0) > 0).length;
+  const withPrice = ALL_ITEMS.filter(i => (parseFloat(i.price_tk)>0) || (parseFloat(i.price_usd)>0)).length;
+
+  statsEl.innerHTML = `
+    <div class="stat"><div class="num">${total}</div><div class="label">Total SKUs</div></div>
+    <div class="stat"><div class="num">${categories}</div><div class="label">Categories</div></div>
+    <div class="stat"><div class="num">${withPrice}</div><div class="label">Priced Items</div></div>
+    <div class="stat"><div class="num">${inStock}</div><div class="label">In Stock</div></div>
+  `;
+}
+
+document.getElementById('search').addEventListener('input', render);
+
+loadCatalog();
+</script>
+
+</body>
+</html>
