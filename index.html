@@ -396,7 +396,7 @@
   </div>
 </div>
 <div class="controls">
-  <div class="search-hint">Tip: click any column header to sort — click again to reverse. Try searching by rating ("585wp", "5.5kw", "30a"), product type ("panel", "pump", "vfd", "mcb"), brand, or location.</div>
+  <div class="search-hint">Tip: click any column header to sort — click again to reverse. Try searching by wattage ("65w", "550w"), product type ("panel", "mcb", "fuse", "spd"), brand, or tier.</div>
 </div>
 
 <div class="stats" id="stats"></div>
@@ -679,12 +679,10 @@ function formatPriceCell(item){
 }
 
 function formatRatingCell(item){
-  if(item.rating === null || item.rating === undefined || isNaN(item.rating)){
-    return item.power_capacity
-      ? `<span class="wattage-cell" style="font-weight:400;">${item.power_capacity}</span>`
-      : `<span style="color:var(--text-dim);">—</span>`;
+  if(!item.power_capacity){
+    return `<span style="color:var(--text-dim);">—</span>`;
   }
-  return `<span class="wattage-cell">${item.rating}<span class="unit"> ${item.rating_unit || ''}</span></span>`;
+  return `<span class="wattage-cell">${item.power_capacity}</span>`;
 }
 
 // Resolve a free-text search query into a set of matching tokens, expanding
