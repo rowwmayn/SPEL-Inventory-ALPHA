@@ -380,7 +380,7 @@
       <p>Live pricing reference — synced from the team's data sheets</p>
     </div>
     <div class="meta-block">
-      <div>SOURCE: <span id="source-count">4</span> data sheets</div>
+      <div>SOURCE: <span id="source-count">1</span> data sheet</div>
       <div class="updated">LAST SYNC: <span id="last-updated">—</span></div>
     </div>
   </div>
@@ -396,7 +396,7 @@
   </div>
 </div>
 <div class="controls">
-  <div class="search-hint">Tip: click any column header to sort — click again to reverse. Try searching by wattage ("65w", "550w"), product type ("panel", "mcb", "fuse", "spd"), brand, or tier.</div>
+  <div class="search-hint">Tip: click any column header to sort — click again to reverse. Try searching by rating ("585wp", "5.5kw", "30a"), product type ("panel", "pump", "vfd", "mcb"), brand, or location.</div>
 </div>
 
 <div class="stats" id="stats"></div>
@@ -406,39 +406,40 @@
 </main>
 
 <footer>
-  <p>Data sourced from <code>/data/*.csv</code> — to update prices or add new products, edit the relevant CSV and push to the repository. The catalog rebuilds automatically on page load.</p>
-  <p>Serial ID format: <code>[Category Letter]-[3 digit number]</code> — P = Solar Panel, C = Charge Controller, B = Circuit Breaker / Protection, S = SPD / Surge Protector.</p>
+  <p>Data sourced from <code>/data/inventory.csv</code> — to update prices, stock, or add new products, edit that single sheet and push to the repository. The catalog rebuilds automatically on page load.</p>
+  <p>Serial ID format: <code>SKU-[row number]</code>, assigned automatically in source-file order. The <code>Remarks</code> column from the sheet is intentionally excluded from the catalog.</p>
 </footer>
 
 <script>
-const CSV_FILES = [
-  'data/solar_panels.csv',
-  'data/charge_controllers.csv',
-  'data/circuit_protection.csv',
-  'data/spd_surge_protectors.csv',
-  'data/pumps.csv',
-];
+// Single source-of-truth CSV. Columns expected (header row, order doesn't matter):
+// Sl No, Item Name, Brand, Model, Power/Capacity, Qty, TWP, Product Location, Prices, Remarks
+// Every column is read except "Remarks", which is intentionally ignored.
+const CSV_FILE = 'data/inventory.csv';
 
-// Maps loose search terms to category names / aliases, so e.g. "panel" or "mcb"
-// matches even if the user doesn't type the exact category string.
+// Maps loose search terms / abbreviations to category keywords, so e.g. "breaker"
+// or "solar" matches even if the user doesn't type the exact category text.
 const CATEGORY_ALIASES = {
-  'panel': ['solar panel'],
-  'panels': ['solar panel'],
-  'solar': ['solar panel'],
-  'pv': ['solar panel'],
-  'controller': ['charge controller'],
-  'controllers': ['charge controller'],
-  'charge controller': ['charge controller'],
-  'breaker': ['circuit breaker (mcb)', 'mccb', 'dc isolator'],
-  'breakers': ['circuit breaker (mcb)', 'mccb', 'dc isolator'],
-  'mcb': ['circuit breaker (mcb)'],
-  'mccb': ['mccb'],
-  'isolator': ['dc isolator'],
-  'fuse': ['fuse', 'fuse with holder'],
-  'fuses': ['fuse', 'fuse with holder'],
-  'spd': ['spd (pv dc)', 'spd (ac)'],
-  'surge': ['spd (pv dc)', 'spd (ac)'],
-  'surge protector': ['spd (pv dc)', 'spd (ac)'],
+  'breaker': ['mcb', 'mccb', 'acb', 'dc mcb'],
+  'breakers': ['mcb', 'mccb', 'acb', 'dc mcb'],
+  'panel': ['solar panel', 'solar panel bi'],
+  'panels': ['solar panel', 'solar panel bi'],
+  'pv': ['solar panel', 'solar panel bi', 'pv combiner box'],
+  'motor': ['submersible motor', 'solar submersible pump motor', 'waterfilled rewindable motor'],
+  'motors': ['submersible motor', 'solar submersible pump motor', 'waterfilled rewindable motor'],
+  'pump': ['surface pump', 'submursible pumpset', 'monoblock pump', 'centrifugal monoblock pump',
+           'centrifugal monoblock pumpsets', 'centrifugal monoset pump', 'submursible pumpset with motor'],
+  'pumps': ['surface pump', 'submursible pumpset', 'monoblock pump', 'centrifugal monoblock pump',
+            'centrifugal monoblock pumpsets', 'centrifugal monoset pump', 'submursible pumpset with motor'],
+  'inverter': ['solar pump inverter', 'power inverter', 'hybrid inverter', 'grid inverter solar',
+               'pump inverter', 'power inverter (hybrid)', 'inverter charger combination'],
+  'inverters': ['solar pump inverter', 'power inverter', 'hybrid inverter', 'grid inverter solar',
+                'pump inverter', 'power inverter (hybrid)', 'inverter charger combination'],
+  'controller': ['solar pump controller', 'home system solar charge controller', 'mppt charge controller',
+                 'solar charge controller', 'submersible pump controller'],
+  'controllers': ['solar pump controller', 'home system solar charge controller', 'mppt charge controller',
+                  'solar charge controller', 'submersible pump controller'],
+  'surge': ['spd', 'ac spd'],
+  'surge protector': ['spd', 'ac spd'],
 };
 
 let ALL_ITEMS = [];
@@ -447,14 +448,14 @@ let SORT_KEY = 'category';
 let SORT_DIR = 1; // 1 = asc, -1 = desc
 
 const COLUMNS = [
-  { key: 'serial_id',  label: 'Serial',   sortable: true,  type: 'string' },
-  { key: 'category',   label: 'Category', sortable: true,  type: 'string' },
-  { key: 'model',      label: 'Model',    sortable: true,  type: 'string' },
-  { key: 'brand',      label: 'Brand',    sortable: true,  type: 'string' },
-  { key: 'wattage',    label: 'Wattage / Rating', sortable: true, type: 'number' },
-  { key: 'sort_price', label: 'Price',    sortable: true,  type: 'number' },
-  { key: 'stock_qty',  label: 'Stock',    sortable: true,  type: 'number' },
-  { key: 'notes',      label: 'Notes',    sortable: false, type: 'string' },
+  { key: 'serial_id',  label: 'Serial',    sortable: true,  type: 'string' },
+  { key: 'category',   label: 'Category',  sortable: true,  type: 'string' },
+  { key: 'model',      label: 'Model',     sortable: true,  type: 'string' },
+  { key: 'brand',      label: 'Brand',     sortable: true,  type: 'string' },
+  { key: 'rating',     label: 'Power / Capacity', sortable: true, type: 'number' },
+  { key: 'sort_price', label: 'Price',     sortable: true,  type: 'number' },
+  { key: 'stock_qty',  label: 'Qty',       sortable: true,  type: 'number' },
+  { key: 'location',   label: 'Location',  sortable: true,  type: 'string' },
 ];
 
 // --- Minimal CSV parser (handles quoted fields with commas) ---
@@ -489,45 +490,113 @@ function parseCSV(text){
   });
 }
 
-// Extract a representative wattage / current rating number from model + specs,
-// so users can search/sort by "65w", "100w", "16a", etc.
-function extractWattage(item){
-  const haystack = `${item.model} ${item.specifications}`;
-  // Prefer an explicit Wp rating (handles ranges like 9.74-9.92A by ignoring decimals < 1 with 'A')
-  let m = haystack.match(/(\d+(?:\.\d+)?)\s*Wp/i);
-  if(m) return parseFloat(m[1]);
-  // Fallback: an Amp rating (for breakers/fuses), take the first integer A rating
-  m = haystack.match(/(\d+)\s*A\b/i);
-  if(m) return parseFloat(m[1]);
-  return null;
+// Collapse inner whitespace and trim, so "solar panel " / "Solar Panel" / " solar  panel"
+// all resolve to the same category key instead of splintering into separate filter buttons.
+function cleanText(s){
+  return (s || '').replace(/\s+/g, ' ').trim();
+}
+
+// Known abbreviations that should stay fully uppercase instead of being Title Cased
+// (e.g. "Dc Mcb" -> "DC MCB", "Mppt Charge Controller" -> "MPPT Charge Controller").
+const ACRONYMS = new Set(['MCB','MCCB','ACB','APFC','VFD','TOR','DC','AC','SPD','PV','MPPT','TWP',
+  'MFM','MMR','WH1','RDF']);
+
+function titleCase(s){
+  return cleanText(s)
+    .replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1).toLowerCase())
+    .split(' ')
+    .map(w => ACRONYMS.has(w.toUpperCase()) ? w.toUpperCase() : w)
+    .join(' ');
+}
+
+// Turn a raw source row into the shape the catalog UI uses.
+// Every column is mapped except "Remarks", which is dropped on purpose.
+function mapRow(raw, index){
+  const category = titleCase(raw['Item Name']);
+  const brand = cleanText(raw['Brand']);
+  const model = cleanText(raw['Model']);
+  const powerCapacity = cleanText(raw['Power/Capacity']);
+  const qty = cleanText(raw['Qty']);
+  const twp = cleanText(raw['TWP']);
+  const location = titleCase(raw['Product Location']);
+  const prices = cleanText(raw['Prices']);
+  const slNo = cleanText(raw['Sl No']);
+
+  return {
+    serial_id: slNo ? `SKU-${slNo.padStart(3,'0')}` : `SKU-${String(index+1).padStart(3,'0')}`,
+    category: category || 'Uncategorized',
+    brand,
+    model,
+    power_capacity: powerCapacity,
+    twp,
+    stock_qty: qty,
+    location,
+    price: prices,
+  };
+}
+
+// Best-effort extraction of a single representative numeric rating (and its unit)
+// out of a messy free-text field like "1.5kw/2hp/220v/50hz" or "585wp".
+// Priority favors the rating that actually describes power/capacity over
+// voltage, frequency, or phase counts that happen to share the same field.
+const RATING_PATTERNS = [
+  { unit: 'kW',  re: /(\d+(?:\.\d+)?)\s*k\s*w\b/i },
+  { unit: 'Wp',  re: /(\d+(?:\.\d+)?)\s*wp\b/i },
+  { unit: 'HP',  re: /(\d+(?:\.\d+)?)\s*hp\b/i },
+  { unit: 'kVA', re: /(\d+(?:\.\d+)?)\s*kva\b/i },
+  { unit: 'kA',  re: /(\d+(?:\.\d+)?)\s*ka\b/i },
+  { unit: 'VA',  re: /(\d+(?:\.\d+)?)\s*va\b/i },
+  { unit: 'A',   re: /\bdc\s*(\d+(?:\.\d+)?)\b/i },   // e.g. "DC40" on DC MCB ratings
+  { unit: 'A',   re: /(\d+(?:\.\d+)?)\s*a\b(?!\w)/i },
+  { unit: 'W',   re: /(\d+(?:\.\d+)?)\s*w\b/i },
+];
+
+function extractRating(item){
+  // TWP ("Total Watt Peak") is a pre-computed numeric field the sheet already
+  // provides for many rows — trust it first when it's a plain number.
+  if(item.twp && /^\d+(\.\d+)?$/.test(item.twp)){
+    const isPanel = /panel/i.test(item.category);
+    return { value: parseFloat(item.twp), unit: isPanel ? 'Wp' : 'W' };
+  }
+  const text = item.power_capacity;
+  for(const p of RATING_PATTERNS){
+    const m = text.match(p.re);
+    if(m) return { value: parseFloat(m[1]), unit: p.unit };
+  }
+  return { value: null, unit: null };
 }
 
 function getSortPrice(item){
-  const tk = parseFloat(item.price_tk);
-  if(!isNaN(tk) && tk > 0) return tk;
-  const usd = parseFloat(item.price_usd);
-  if(!isNaN(usd) && usd > 0) return usd * 120; // rough USD->BDT for unified sorting
+  const p = parseFloat((item.price || '').replace(/[^\d.]/g, ''));
+  if(!isNaN(p) && p > 0) return p;
   return -1; // unpriced items sort last on ascending
 }
 
 async function loadCatalog(){
-  const results = [];
-  for(const file of CSV_FILES){
-    try{
-      const res = await fetch(file);
-      if(!res.ok) continue;
+  let items = [];
+  try{
+    const res = await fetch(CSV_FILE);
+    if(res.ok){
       const text = await res.text();
-      const items = parseCSV(text);
-      items.forEach(item => results.push(item));
-    } catch(e){
-      console.warn('Could not load', file, e);
+      const rows = parseCSV(text);
+      items = rows.map((raw, idx) => mapRow(raw, idx));
+    } else {
+      console.warn('Could not load', CSV_FILE, res.status);
     }
+  } catch(e){
+    console.warn('Could not load', CSV_FILE, e);
   }
-  ALL_ITEMS = results.map(item => ({
-    ...item,
-    wattage: extractWattage(item),
-    sort_price: getSortPrice(item),
-  }));
+
+  ALL_ITEMS = items.map(item => {
+    const rating = extractRating(item);
+    return {
+      ...item,
+      rating: rating.value,
+      rating_unit: rating.unit,
+      sort_price: getSortPrice(item),
+    };
+  });
+
   document.getElementById('last-updated').textContent =
     new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
   buildFilters();
@@ -602,67 +671,59 @@ function buildTableHead(){
 }
 
 function formatPriceCell(item){
-  const tk = parseFloat(item.price_tk);
-  const usd = parseFloat(item.price_usd);
-  if(!isNaN(tk) && tk > 0){
-    return `<span class="price-cell"><span class="currency tk">৳</span>${tk.toLocaleString('en-IN',{maximumFractionDigits:2})} <span class="unit">/ ${item.unit || 'pc'}</span></span>`;
-  }
-  if(!isNaN(usd) && usd > 0){
-    return `<span class="price-cell"><span class="currency usd">$</span>${usd.toLocaleString('en-US',{maximumFractionDigits:2})} <span class="unit">/ ${item.unit || 'pc'}</span></span>`;
+  const p = parseFloat((item.price || '').replace(/[^\d.]/g, ''));
+  if(!isNaN(p) && p > 0){
+    return `<span class="price-cell"><span class="currency tk">৳</span>${p.toLocaleString('en-IN',{maximumFractionDigits:2})} <span class="unit">/ pc</span></span>`;
   }
   return `<span class="price-cell na">N/A</span>`;
 }
 
-function formatWattageCell(item){
-  if(item.wattage === null) return `<span style="color:var(--text-dim);">—</span>`;
-  // figure out whether this is a Wp rating or an A rating based on source text
-  const isWatt = /Wp/i.test(`${item.model} ${item.specifications}`);
-  const unit = isWatt ? 'Wp' : 'A';
-  return `<span class="wattage-cell">${item.wattage}<span class="unit"> ${unit}</span></span>`;
-}
-
-function formatSpecs(specString){
-  if(!specString) return '';
-  return specString.split('|').map(s => s.trim()).join('<span class="divider"> · </span>');
+function formatRatingCell(item){
+  if(item.rating === null || item.rating === undefined || isNaN(item.rating)){
+    return item.power_capacity
+      ? `<span class="wattage-cell" style="font-weight:400;">${item.power_capacity}</span>`
+      : `<span style="color:var(--text-dim);">—</span>`;
+  }
+  return `<span class="wattage-cell">${item.rating}<span class="unit"> ${item.rating_unit || ''}</span></span>`;
 }
 
 // Resolve a free-text search query into a set of matching tokens, expanding
-// category aliases (e.g. "panel" -> "solar panel", "mcb" -> "circuit breaker (mcb)")
+// category aliases (e.g. "breaker" -> "mcb"/"mccb"/"acb", "pump" -> pump categories)
 function matchesQuery(item, query){
   if(!query || !query.trim()) return true;
   const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
 
   const haystack = [
     item.serial_id, item.category, item.brand, item.model,
-    item.specifications, item.notes, item.unit,
-    item.wattage !== null ? `${item.wattage}w ${item.wattage}wp ${item.wattage}a` : ''
+    item.power_capacity, item.location,
+    item.rating !== null ? `${item.rating}${(item.rating_unit || '').toLowerCase()}` : ''
   ].join(' ').toLowerCase();
 
-  // every term must match (AND), so "100w panel" narrows to 100W panels,
-  // while a single term like "mcb" or "65w" still matches broadly.
+  // every term must match (AND), so "1.5kw pump" narrows to 1.5kW pumps,
+  // while a single term like "mcb" or "585wp" still matches broadly.
   return terms.every(term => termMatches(item, haystack, term));
 }
 
 function termMatches(item, haystack, term){
-  // direct substring match against everything (covers brand, model, specs, etc.)
+  // direct substring match against everything (covers brand, model, spec text, etc.)
   if(haystack.includes(term)) return true;
 
-  // category alias match, e.g. "panel", "mcb", "fuse", "spd"
+  // category alias match, e.g. "breaker", "pump", "inverter", "controller"
   if(CATEGORY_ALIASES[term]){
     const cats = CATEGORY_ALIASES[term];
-    if(cats.some(c => item.category.toLowerCase() === c)) return true;
+    if(cats.some(c => item.category.toLowerCase().includes(c))) return true;
   }
 
-  // numeric wattage/amperage match: "65w", "65wp", "100watt", "16a" etc.
-  const wattMatch = term.match(/^(\d+(?:\.\d+)?)(w|wp|watt|watts|a|amp|amps)$/);
-  if(wattMatch && item.wattage !== null){
-    const num = parseFloat(wattMatch[1]);
-    if(Math.abs(item.wattage - num) < 0.001) return true;
+  // numeric rating match: "1.5kw", "585wp", "30a" etc.
+  const ratingMatch = term.match(/^(\d+(?:\.\d+)?)(kw|wp|hp|kva|ka|va|a|w)$/);
+  if(ratingMatch && item.rating !== null){
+    const num = parseFloat(ratingMatch[1]);
+    if(Math.abs(item.rating - num) < 0.001) return true;
   }
 
-  // plain number match against wattage, e.g. typing "65" alone
-  if(/^\d+(\.\d+)?$/.test(term) && item.wattage !== null){
-    if(Math.abs(item.wattage - parseFloat(term)) < 0.001) return true;
+  // plain number match against the rating, e.g. typing "585" alone
+  if(/^\d+(\.\d+)?$/.test(term) && item.rating !== null){
+    if(Math.abs(item.rating - parseFloat(term)) < 0.001) return true;
   }
 
   return false;
@@ -721,13 +782,12 @@ function render(){
         <td><span class="cat-pill">${item.category}</span></td>
         <td class="model-cell">
           <div class="model">${item.model || 'Unnamed'}</div>
-          <div class="specs">${formatSpecs(item.specifications)}</div>
         </td>
         <td class="brand-cell">${item.brand || ''}</td>
-        <td>${formatWattageCell(item)}</td>
+        <td>${formatRatingCell(item)}</td>
         <td>${formatPriceCell(item)}</td>
         <td>${stockHtml}</td>
-        <td class="notes-cell">${item.notes || ''}</td>
+        <td class="notes-cell">${item.location || ''}</td>
       </tr>
     `;
   }).join('');
